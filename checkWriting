@@ -1,0 +1,163 @@
+# To run the program, pass in the number you want to print as a parameter
+import sys
+
+print 'Number of arguments:', len(sys.argv), 'arguments.'
+print 'Argument List:', str(sys.argv)
+
+# This is dictionary for number system
+number_system = {
+    3: 'Thousand',
+    6: "Million",
+    9: 'Billion',
+    12: 'Trillion',
+    15: 'Quadrillion',
+    18: 'Quintillion',
+    21: 'Sextillion',
+    24: 'Septillion',
+    27: 'Octillion',
+    30: 'Nonillion',
+    33: 'Decillion',
+    36: 'Undecillion',
+    39: 'Duodecillion'
+}
+
+
+def get_number_system_value_for_number(length_of_number_to_be_printed):
+    return number_system[get_modulus_number_from_length(length_of_number_to_be_printed)]
+
+
+# To get the number system match from dictionary where the naming is mapped with the max length and which is part of
+# table of three We subtract 1 from the length to match the required and subtract this number from length of number -
+# 1 to be printed
+# Ex, for number 12,456,343 - this function should return 6
+# 8-1 = 7, 7%3 is 1 and 7 - 1 = 6
+# this number 6 is used to pick right value from dictionary which is million
+def get_modulus_number_from_length(length):
+    modulus_three = (length - 1) % 3
+    return (length - 1) - modulus_three
+
+
+def convert_and_print(number_to_be_printed):
+    len_of_number = len(number_to_be_printed)
+    string_version = ''
+    if len_of_number > 0:
+        # If the given number is a three digit number then we should append thousand string to it.
+        # After printing that number and appending thousand to it, slice the number and get last two digits of it.
+        if len_of_number == 3:
+            third_digit = number_to_be_printed[0]
+            third_digit_print = print_number(int(third_digit)) + ' Hundred '
+            string_version = third_digit_print
+            number_to_be_printed = number_to_be_printed[-2:]
+            len_of_number = len(number_to_be_printed)
+
+        if len_of_number == 2 and int(number_to_be_printed) > 19:
+            # If given number is more than 19 then we should pick a value from switcher and append it to the
+            # string_version. For example if the number is 24, then we should pass 20 the switcher and append it to
+            # the output. After appending it to the output we slice the string and pass the last digit to the
+            # switcher and append it to sting_version
+            decimal_number = number_to_be_printed[0]
+            decimal_number = decimal_number + "0"
+            two_digit_print = print_number(int(decimal_number))
+            string_version = string_version + two_digit_print + ' '
+            number_to_be_printed = number_to_be_printed[-1]
+
+        # In this case, the number is less than 19 and it is ready to be picked from the main dictionary
+        if len_of_number == 2:
+            string_version = string_version + print_number(int(number_to_be_printed))
+
+        # At this point we have to print just single digit from the main dictionary
+        else:
+            string_version = string_version + print_number(int(number_to_be_printed))
+
+    return string_version
+
+
+# This is the main default dictionary to print a given two digit number to string
+def print_number(number_to_be_printed):
+    switcher = {
+        1: "One",
+        2: "Two",
+        3: "Three",
+        4: "Four",
+        5: "Five",
+        6: "Six",
+        7: "Seven",
+        8: "Eight",
+        9: "Nine",
+        10: "Ten",
+        11: "Eleven",
+        12: "Twelve",
+        13: "Thirteen",
+        14: "Fourteen",
+        15: "Fifteen",
+        16: "Sixteen",
+        17: "Seventeen",
+        18: "Eighteen",
+        19: "Nineteen",
+        20: "Twenty",
+        30: "Thirty",
+        40: "Forty",
+        50: "Fifty",
+        60: "Sixty",
+        70: "Seventy",
+        80: "Eighty",
+        90: "Ninety"
+    }
+    return switcher.get(number_to_be_printed)
+
+
+def main():
+    to_be_printed = str(sys.argv[1])
+    print 'Number to be converted:', to_be_printed
+    # Remove , from string for future conversion
+    to_be_printed = to_be_printed.replace(',', '')
+    validate_dots(to_be_printed)
+    validate_length_of_number(to_be_printed)
+
+    string_to_be_printed = ''
+
+    print 'Sanitized number to be printed:', to_be_printed
+    if len(to_be_printed) > 3:
+        # We needed a strategy to convert the long numbers that is bigger than 999 with a proper number system hence
+        # we take the mod of 3 of the length of the string as number and
+        string_to_be_printed = split_and_print(string_to_be_printed, to_be_printed)
+    else:
+        print convert_and_print(to_be_printed)
+    print string_to_be_printed
+
+
+def validate_length_of_number(to_be_printed):
+    if len(to_be_printed) > 40:
+        print 'Maximum length allowed is 40'
+        exit()
+
+
+# For numbers which have more than 3 digits, break them and print them based on the logic
+def split_and_print(string_to_be_printed, to_be_printed):
+    while True:
+        length_of_number = len(to_be_printed)
+        modulus_length_of_number = get_modulus_number_from_length(length_of_number)
+
+        print 'Length of Number: ', length_of_number
+
+        current_num = to_be_printed[0: length_of_number - modulus_length_of_number]
+        string_to_be_printed = string_to_be_printed + convert_and_print(current_num) + ' ' + number_system[
+            modulus_length_of_number] + ' '
+        print 'Modulus length of number: ', modulus_length_of_number
+        to_be_printed = to_be_printed[length_of_number - modulus_length_of_number:]
+        if int(to_be_printed) < 999:
+            break
+    string_to_be_printed = string_to_be_printed + convert_and_print(to_be_printed)
+    return string_to_be_printed
+
+
+def validate_dots(to_be_printed):
+    if to_be_printed.find('.') > 1:
+        print 'This function does not support decimal points, Please correct input'
+        exit()
+
+
+if __name__ == "__main__":
+    main()
+
+# Reason for using modulus: We wanted to get the proper verbiage for the number system
